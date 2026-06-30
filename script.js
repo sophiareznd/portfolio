@@ -375,6 +375,7 @@ function chuvaDeTecias() {
   const H = window.innerHeight;
 
   const engine = Engine.create();
+  engine.gravity.y = 3;
   const runner = Runner.create();
   engineSobre = engine;
   runnerSobre = runner;
@@ -391,7 +392,7 @@ function chuvaDeTecias() {
   for (let i = 0; i < 105; i++) {
     const letra = letras[i % letras.length];
     const x = Math.random() * (W - 120) + 60;
-    const y = -80 - i * 70;
+    const y = -80 - i * 30;
     const angulo = (Math.random() - 0.5) * 2;
 
     const corpo = Bodies.rectangle(x, y, size, size, {
