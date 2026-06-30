@@ -106,6 +106,10 @@ body.home-ativa nav ul li a {
 }
 
 /* SOBRE MIM */
+#sobre {
+  font-size: 14px;
+}
+
 #sobre.ativa {
   display: flex;
 }
@@ -123,7 +127,7 @@ body.home-ativa nav ul li a {
 }
 
 .sobre-contato {
-  padding-left: 20px;
+  padding-left: 3px;
 }
 
 .sobre-skills .sobre-titulo,
@@ -154,6 +158,146 @@ body.home-ativa nav ul li a {
   color: #FF568D;
 }
 
+.sophia-btn {
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.sophia-btn:hover {
+  color: #FF568D;
+}
+
+/* PROJETO ABERTO */
+#projeto-aberto.ativa {
+  display: flex;
+  flex-direction: column;
+  padding-top: 160px;
+  padding-bottom: 60px;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.projeto-layout {
+  display: flex;
+  gap: 60px;
+  align-items: flex-start;
+  height: 100%;
+}
+
+.projeto-imagens {
+  width: 780px;
+  height: 552px;
+  overflow-y: auto;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+}
+
+.projeto-imagens::-webkit-scrollbar {
+  width: 4px;
+}
+
+.projeto-imagens::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.projeto-imagens::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 2px;
+}
+
+.projeto-imagens:hover::-webkit-scrollbar-thumb {
+  background: #FF568D;
+}
+
+.projeto-imagens img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: none;
+}
+
+.projeto-info {
+  flex: 1;
+  padding-top: 4px;
+  display: flex;
+  flex-direction: column;
+  height: 552px;
+}
+
+.projeto-titulo {
+  font-size: 35px;
+  font-weight: 400;
+  line-height: 1;
+  margin-bottom: 6px;
+  color: #222;
+  letter-spacing: -1px;
+  text-transform: uppercase;
+}
+
+.projeto-ano {
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 16px;
+  font-style: italic;
+}
+
+.projeto-areas {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.projeto-desc {
+  font-size: 13px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.projeto-nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 40px;
+}
+
+.projeto-seta {
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+  user-select: none;
+}
+
+.projeto-seta:hover {
+  color: #FF568D;
+}
+
+/* LIGHTBOX */
+#lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 200;
+  cursor: zoom-out;
+  align-items: center;
+  justify-content: center;
+}
+
+#lightbox.ativo {
+  display: flex;
+}
+
+#lightbox-img {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+  cursor: default;
+}
+
 /* PROJETOS */
 #projetos {
   padding-top: 160px;
@@ -161,10 +305,30 @@ body.home-ativa nav ul li a {
 }
 
 .projetos-grid {
-  display: grid;
-  grid-template-columns: 1.6fr 1.6fr 1fr;
-  grid-template-rows: 450px 474px 300px 300px;
-  gap: 15px;
+  position: relative;
+  width: 1260px;
+  height: 1579px;
+  background-color: #f2f2f2;
+}
+
+.card-wrapper {
+  position: absolute;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.card-wrapper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #FF568D;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.card-wrapper:hover::after {
+  opacity: 0.45;
 }
 
 .capa-projeto {
@@ -172,21 +336,17 @@ body.home-ativa nav ul li a {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  cursor: pointer;
 }
 
-.capa-projeto:hover {
-  opacity: 0.85;
-  transition: opacity 0.2s ease;
-}
+/* Coluna esquerda (x=0) */
+.card-cosmo   { left: 0;    top: 0;      width: 464px; height: 338px; }
+.card-kitkat  { left: 0;    top: 353px;  width: 464px; height: 355px; }
+.card-ama     { left: 0;    top: 723px;  width: 464px; height: 313px; }
+.card-emilie  { left: 0;    top: 1051px; width: 769px; height: 513px; }
 
-/* Posicionamento de cada card */
-.card-cosmo       { grid-column: 1;     grid-row: 1; }
-.card-revista     { grid-column: 2 / 4; grid-row: 1; }
-.card-kitkat      { grid-column: 1;     grid-row: 2; }
-.card-sinapse     { grid-column: 2;     grid-row: 2; }
-.card-anjos       { grid-column: 3;     grid-row: 2; }
-.card-ama         { grid-column: 1;     grid-row: 3; }
-.card-emilie      { grid-column: 2;     grid-row: 3 / 5; }
-.card-jagerbomb   { grid-column: 3;     grid-row: 3; }
-.card-seposicione { grid-column: 3;     grid-row: 4; }
+/* Coluna direita topo (x=479) */
+.card-revista { left: 479px; top: 0;     width: 781px; height: 491px; }
+.card-sinapse { left: 479px; top: 506px; width: 430px; height: 529px; }
+.card-anjos   { left: 924px; top: 506px; width: 336px; height: 529px; }
+.card-jagerbomb   { left: 784px; top: 1051px; width: 476px; height: 268px; }
+.card-seposicione { left: 784px; top: 1334px; width: 476px; height: 230px; }
