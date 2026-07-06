@@ -436,7 +436,7 @@ function chuvaDeTecias() {
     );
     if (todasParadas) {
       clearInterval(checkSettled);
-      chuvaTimer = setTimeout(() => abrirChao(), 5000);
+      chuvaTimer = setTimeout(() => abrirChao(), 7000);
     }
   }, 500);
 
@@ -447,7 +447,7 @@ function chuvaDeTecias() {
       clearTimeout(chuvaTimer);
       abrirChao();
     }
-  }, 5000);
+  }, 9000);
 }
 
 function abrirChao() {
