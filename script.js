@@ -87,7 +87,7 @@ function iniciarFisica() {
   Events.on(engine, 'afterUpdate', () => {
     corposAtual.forEach(({ corpo, id }) => {
       const el = document.getElementById(id);
-      if (!el) return;
+      if (!el || el === elArrastado) return;
       el.style.left = (corpo.position.x - size/2) + 'px';
       el.style.top = (corpo.position.y - size/2) + 'px';
       el.style.transform = `rotate(${corpo.angle}rad)`;
