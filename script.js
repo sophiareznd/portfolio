@@ -13,17 +13,14 @@ let teclaOffset = { x: 0, y: 0 };
 window.addEventListener('mousemove', e => {
   if (!teclaArrastando || !corpoArrastado || !elArrastado) return;
   const sz = parseInt(elArrastado.style.width);
-  const lx = e.clientX - teclaOffset.x;
-  const ly = e.clientY - teclaOffset.y;
-  elArrastado.style.left = (lx - sz / 2) + 'px';
-  elArrastado.style.top  = (ly - sz / 2) + 'px';
-  Matter.Body.setPosition(corpoArrastado, { x: lx, y: ly });
+  elArrastado.style.left = (e.clientX - sz / 2) + 'px';
+  elArrastado.style.top  = (e.clientY - sz / 2) + 'px';
+  Matter.Body.setPosition(corpoArrastado, { x: e.clientX, y: e.clientY });
 });
 
 window.addEventListener('mouseup', () => {
   if (!teclaArrastando || !corpoArrastado) return;
   if (elArrastado) {
-    elArrastado.style.animation = '';
     elArrastado.style.cursor = 'grab';
   }
   Matter.Body.setPosition(corpoArrastado, {
@@ -36,7 +33,6 @@ window.addEventListener('mouseup', () => {
   teclaArrastando = false;
   corpoArrastado = null;
   elArrastado = null;
-  teclaOffset = { x: 0, y: 0 };
 });
 
 window.addEventListener('scroll', () => {
@@ -57,9 +53,16 @@ function iniciarFisica() {
     Engine.clear(engineAtual);
   }
 
-  const container = document.getElementById('teclas-container');
-  const W = container.offsetWidth;
-  const H = container.offsetHeight;
+  const overlayAnt = document.getElementById('teclas-home-overlay');
+  if (overlayAnt) overlayAnt.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'teclas-home-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:10;overflow:hidden;';
+  document.body.appendChild(overlay);
+
+  const W = window.innerWidth;
+  const H = window.innerHeight;
 
   const engine = Engine.create();
   const runner = Runner.create();
@@ -68,41 +71,42 @@ function iniciarFisica() {
   Runner.run(runner, engine);
 
   const chao = Bodies.rectangle(W/2, H + 25, W, 50, { isStatic: true });
-  const paredeDir = Bodies.rectangle(W + 25, H/2, 50, H, { isStatic: true });
-  const paredeEsq = Bodies.rectangle(-25, H/2, 50, H, { isStatic: true });
+  const paredeDir = Bodies.rectangle(W + 25, H/2, 50, H * 3, { isStatic: true });
+  const paredeEsq = Bodies.rectangle(-25, H/2, 50, H * 3, { isStatic: true });
   World.add(engine.world, [chao, paredeDir, paredeEsq]);
 
   corposAtual = [];
 
   teclaIds.forEach((id, i) => {
-    const x = W * 0.5 + (i % 3) * 80 + Math.random() * 40;
+    const letra = id.replace('tecla-', '');
+    const x = W * 0.65 + (i % 3) * 80 + Math.random() * 40;
     const y = -100 - i * 120;
     const angulo = (Math.random() - 0.5) * 1.5;
     const corpo = Bodies.rectangle(x, y, size, size, {
-      restitution: 0.3,
-      friction: 0.8,
-      frictionAir: 0.01,
-      angle: angulo
+      restitution: 0.3, friction: 0.8, frictionAir: 0.01, angle: angulo
     });
-    corposAtual.push({ corpo, id });
+
+    const el = document.createElement('img');
+    el.src = `imagens/teclas/teclas-${letra}.png`;
+    el.dataset.id = id;
+    el.style.cssText = `position:absolute;width:${size}px;cursor:grab;pointer-events:auto;user-select:none;-webkit-user-drag:none;`;
+    overlay.appendChild(el);
+
+    corposAtual.push({ corpo, el });
     World.add(engine.world, corpo);
   });
 
   Events.on(engine, 'afterUpdate', () => {
-    corposAtual.forEach(({ corpo, id }) => {
-      const el = document.getElementById(id);
-      if (!el || el === elArrastado) return;
+    corposAtual.forEach(({ corpo, el }) => {
+      if (el === elArrastado) return;
       el.style.left = (corpo.position.x - size/2) + 'px';
-      el.style.top = (corpo.position.y - size/2) + 'px';
+      el.style.top  = (corpo.position.y - size/2) + 'px';
       el.style.transform = `rotate(${corpo.angle}rad)`;
     });
   });
 
-  corposAtual.forEach(({ corpo, id }) => {
-    const el = document.getElementById(id);
+  corposAtual.forEach(({ corpo, el }) => {
     el.addEventListener('mousedown', (e) => {
-      const cr = document.getElementById('teclas-container').getBoundingClientRect();
-      teclaOffset = { x: cr.left, y: cr.top };
       teclaArrastando = true;
       teclaLastX = e.clientX;
       teclaLastY = e.clientY;
