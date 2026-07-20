@@ -21,12 +21,14 @@ window.addEventListener('mousemove', e => {
 window.addEventListener('mouseup', () => {
   if (!teclaArrastando || !corpoArrastado) return;
   if (elArrastado) {
+    elArrastado.style.animation = '';
     elArrastado.style.cursor = 'grab';
+    const sz = parseInt(elArrastado.style.width);
+    Matter.Body.setPosition(corpoArrastado, {
+      x: parseFloat(elArrastado.style.left) + sz / 2,
+      y: parseFloat(elArrastado.style.top)  + sz / 2
+    });
   }
-  Matter.Body.setPosition(corpoArrastado, {
-    x: parseFloat(elArrastado.style.left) + size / 2,
-    y: parseFloat(elArrastado.style.top)  + size / 2
-  });
   Matter.Body.setAngle(corpoArrastado, 0);
   Matter.Body.setStatic(corpoArrastado, false);
   Matter.Body.setVelocity(corpoArrastado, { x: 0, y: 0 });
@@ -51,6 +53,7 @@ function iniciarFisica() {
     Runner.stop(runnerAtual);
     World.clear(engineAtual.world);
     Engine.clear(engineAtual);
+    engineAtual = null;
   }
 
   const overlayAnt = document.getElementById('teclas-home-overlay');
@@ -63,8 +66,10 @@ function iniciarFisica() {
 
   const W = window.innerWidth;
   const H = window.innerHeight;
+  const sz = 72;
 
   const engine = Engine.create();
+  engine.gravity.y = 3;
   const runner = Runner.create();
   engineAtual = engine;
   runnerAtual = runner;
@@ -76,59 +81,69 @@ function iniciarFisica() {
   World.add(engine.world, [chao, paredeDir, paredeEsq]);
 
   corposAtual = [];
+  const letras = ['s', 'o', 'p', 'h', 'i', 'a'];
 
-  teclaIds.forEach((id, i) => {
-    const letra = id.replace('tecla-', '');
-    const x = W * 0.65 + (i % 3) * 80 + Math.random() * 40;
-    const y = -100 - i * 120;
-    const angulo = (Math.random() - 0.5) * 1.5;
-    const corpo = Bodies.rectangle(x, y, size, size, {
-      restitution: 0.3, friction: 0.8, frictionAir: 0.01, angle: angulo
+  letras.forEach((letra, i) => {
+    const x = W * 0.5 + (i % 3) * (sz + 20) + Math.random() * 40;
+    const y = -80 - i * 150;
+    const angulo = (Math.random() - 0.5) * 2;
+
+    const corpo = Bodies.rectangle(x, y, sz, sz, {
+      restitution: 0, friction: 0.9, frictionAir: 0.05, angle: angulo
     });
 
     const el = document.createElement('img');
     el.src = `imagens/teclas/teclas-${letra}.png`;
-    el.dataset.id = id;
-    el.style.cssText = `position:absolute;width:${size}px;cursor:grab;pointer-events:auto;user-select:none;-webkit-user-drag:none;`;
+    el.style.cssText = `position:absolute;width:${sz}px;cursor:grab;pointer-events:auto;user-select:none;-webkit-user-drag:none;`;
     overlay.appendChild(el);
 
-    corposAtual.push({ corpo, el });
-    World.add(engine.world, corpo);
-  });
-
-  Events.on(engine, 'afterUpdate', () => {
-    corposAtual.forEach(({ corpo, el }) => {
-      if (el === elArrastado) return;
-      el.style.left = (corpo.position.x - size/2) + 'px';
-      el.style.top  = (corpo.position.y - size/2) + 'px';
-      el.style.transform = `rotate(${corpo.angle}rad)`;
-    });
-  });
-
-  corposAtual.forEach(({ corpo, el }) => {
     el.addEventListener('mousedown', (e) => {
       teclaArrastando = true;
-      teclaLastX = e.clientX;
-      teclaLastY = e.clientY;
       corpoArrastado = corpo;
       elArrastado = el;
       Body.setStatic(corpo, true);
       Body.setVelocity(corpo, { x: 0, y: 0 });
       Body.setAngularVelocity(corpo, 0);
-      el.style.transition = 'none';
       el.style.cursor = 'grabbing';
+      el.style.transition = 'transform 0.15s ease';
+      el.style.transform = 'rotate(0deg)';
+      setTimeout(() => {
+        el.style.transition = '';
+        el.style.animation = 'tecla-wiggle 0.4s ease infinite alternate';
+      }, 150);
       e.preventDefault();
+    });
+
+    corposAtual.push({ corpo, el, sz });
+    World.add(engine.world, corpo);
+  });
+
+  Events.on(engine, 'afterUpdate', () => {
+    corposAtual.forEach(({ corpo, el, sz }) => {
+      if (el === elArrastado) return;
+      el.style.left = (corpo.position.x - sz/2) + 'px';
+      el.style.top  = (corpo.position.y - sz/2) + 'px';
+      el.style.transform = `rotate(${corpo.angle}rad)`;
     });
   });
 }
 
 function mostrarPagina(id) {
-  // Para a chuva de teclas ao sair do sobre
   if (id !== 'sobre') {
     chuvaAtiva = false;
     clearTimeout(chuvaTimer);
     const overlay = document.getElementById('teclas-sobre-container');
     if (overlay) overlay.remove();
+  }
+  if (id !== 'home') {
+    const homeOverlay = document.getElementById('teclas-home-overlay');
+    if (homeOverlay) homeOverlay.remove();
+    if (engineAtual) {
+      Matter.Runner.stop(runnerAtual);
+      Matter.World.clear(engineAtual.world);
+      Matter.Engine.clear(engineAtual);
+      engineAtual = null;
+    }
   }
 
   document.querySelectorAll('.pagina').forEach(p => p.classList.remove('ativa'));
