@@ -80,12 +80,14 @@ function iniciarFisica() {
   const paredeEsq = Bodies.rectangle(-25, H/2, 50, H * 3, { isStatic: true });
   World.add(engine.world, [chao, paredeDir, paredeEsq]);
 
-  corposAtual = [];
   const letras = ['s', 'o', 'p', 'h', 'i', 'a'];
+  const pares = [];
 
   letras.forEach((letra, i) => {
-    const x = W * 0.5 + (i % 3) * (sz + 20) + Math.random() * 40;
-    const y = -80 - i * 150;
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    const x = W * 0.55 + col * (sz + 30) + Math.random() * 30;
+    const y = -100 - row * 200 - Math.random() * 80;
     const angulo = (Math.random() - 0.5) * 2;
 
     const corpo = Bodies.rectangle(x, y, sz, sz, {
@@ -97,29 +99,44 @@ function iniciarFisica() {
     el.style.cssText = `position:absolute;width:${sz}px;cursor:grab;pointer-events:auto;user-select:none;-webkit-user-drag:none;`;
     overlay.appendChild(el);
 
-    el.addEventListener('mousedown', (e) => {
-      teclaArrastando = true;
-      corpoArrastado = corpo;
-      elArrastado = el;
+    el.addEventListener('mousedown', (ev) => {
       Body.setStatic(corpo, true);
       Body.setVelocity(corpo, { x: 0, y: 0 });
       Body.setAngularVelocity(corpo, 0);
+      elArrastado = el;
       el.style.cursor = 'grabbing';
-      el.style.transition = 'transform 0.15s ease';
-      el.style.transform = 'rotate(0deg)';
-      setTimeout(() => {
-        el.style.transition = '';
-        el.style.animation = 'tecla-wiggle 0.4s ease infinite alternate';
-      }, 150);
-      e.preventDefault();
+      el.style.animation = 'tecla-wiggle 0.4s ease infinite alternate';
+      ev.preventDefault();
+
+      const onMove = (ev) => {
+        el.style.left = (ev.clientX - sz / 2) + 'px';
+        el.style.top  = (ev.clientY - sz / 2) + 'px';
+        Body.setPosition(corpo, { x: ev.clientX, y: ev.clientY });
+      };
+      const onUp = () => {
+        el.style.animation = '';
+        el.style.cursor = 'grab';
+        Body.setPosition(corpo, {
+          x: parseFloat(el.style.left) + sz / 2,
+          y: parseFloat(el.style.top)  + sz / 2
+        });
+        Body.setAngle(corpo, 0);
+        Body.setStatic(corpo, false);
+        Body.setVelocity(corpo, { x: 0, y: 0 });
+        elArrastado = null;
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('mouseup', onUp);
+      };
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
     });
 
-    corposAtual.push({ corpo, el, sz });
+    pares.push({ corpo, el });
     World.add(engine.world, corpo);
   });
 
   Events.on(engine, 'afterUpdate', () => {
-    corposAtual.forEach(({ corpo, el, sz }) => {
+    pares.forEach(({ corpo, el }) => {
       if (el === elArrastado) return;
       el.style.left = (corpo.position.x - sz/2) + 'px';
       el.style.top  = (corpo.position.y - sz/2) + 'px';
