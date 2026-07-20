@@ -380,6 +380,7 @@ function chuvaDeTecias() {
   World.add(engine.world, [chaoSobre, paredeDir, paredeEsq]);
 
   const letras = ['s', 'o', 'p', 'h', 'i', 'a'];
+  const size = 60;
   corposSobre = [];
 
   for (let i = 0; i < 105; i++) {
