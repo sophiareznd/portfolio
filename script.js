@@ -97,6 +97,11 @@ function iniciarFisica() {
   corposAtual.forEach(({ corpo, id }) => {
     const el = document.getElementById(id);
     el.addEventListener('mousedown', (e) => {
+      const rect = el.getBoundingClientRect();
+      el.style.position = 'fixed';
+      el.style.left = rect.left + 'px';
+      el.style.top  = rect.top  + 'px';
+      document.body.appendChild(el);
       teclaArrastando = true;
       teclaLastX = e.clientX;
       teclaLastY = e.clientY;
@@ -107,6 +112,7 @@ function iniciarFisica() {
       Body.setAngularVelocity(corpo, 0);
       el.style.transition = 'none';
       el.style.cursor = 'grabbing';
+      el.style.zIndex = '999';
       e.preventDefault();
     });
   });
