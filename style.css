@@ -158,6 +158,11 @@ body.home-ativa nav ul li a {
   color: #FF568D;
 }
 
+@keyframes tecla-wiggle {
+  from { transform: rotate(-6deg); }
+  to   { transform: rotate(6deg); }
+}
+
 .sophia-btn {
   cursor: pointer;
   transition: color 0.15s ease;
