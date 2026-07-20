@@ -89,7 +89,7 @@ function iniciarFisica() {
   letras.forEach((letra, i) => {
     const col = i % 3;
     const row = Math.floor(i / 3);
-    const x = W * 0.55 + col * (sz + 30) + Math.random() * 30;
+    const x = W * 0.72 + col * (sz + 30) + Math.random() * 30;
     const y = -100 - row * 200 - Math.random() * 80;
     const angulo = (Math.random() - 0.5) * 2;
 
