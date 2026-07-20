@@ -59,6 +59,9 @@ function iniciarFisica() {
   const overlayAnt = document.getElementById('teclas-home-overlay');
   if (overlayAnt) overlayAnt.remove();
 
+  const container = document.getElementById('teclas-container');
+  if (container) container.style.visibility = 'hidden';
+
   const overlay = document.createElement('div');
   overlay.id = 'teclas-home-overlay';
   overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:10;overflow:hidden;';
