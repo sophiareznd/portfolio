@@ -15,14 +15,14 @@ body {
 nav {
   display: flex;
   align-items: center;
-  padding: 0 200px;
-  background-color: transparent;
+  padding: 0 60px;
+  background-color: #f2f2f2;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  height: 160px;
+  height: 43px;
   transition: transform 0.3s ease;
 }
 
@@ -31,30 +31,28 @@ nav.escondida {
 }
 
 nav .logo img {
-  width: 40px;
+  width: 22px;
 }
 
 nav ul {
   display: flex;
   list-style: none;
-  justify-content: space-between;
+  justify-content: flex-end;
+  gap: 40px;
   flex: 1;
-  padding-left: 200px;
+  padding-left: 0;
 }
 
 nav ul li a {
   text-decoration: none;
   color: #FF568D;
-  font-size: 18px;
+  font-size: 15px;
 }
 
 nav ul li a.ativa {
   text-decoration: underline;
 }
 
-body.home-ativa nav ul li a {
-  color: white;
-}
 
 /* PÁGINAS */
 .pagina {
@@ -351,7 +349,7 @@ body.home-ativa nav ul li a {
 
   /* NAV */
   nav {
-    padding: 0 24px;
+    padding: 0 60px;
     height: 70px;
   }
 
@@ -365,7 +363,7 @@ body.home-ativa nav ul li a {
   }
 
   nav .logo img {
-    width: 28px;
+    width: 22px;
   }
 
   /* PÁGINAS */
