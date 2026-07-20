@@ -8,13 +8,16 @@ let elArrastado = null;
 let teclaArrastando = false;
 let teclaLastX = 0;
 let teclaLastY = 0;
+let teclaOffset = { x: 0, y: 0 };
 
 window.addEventListener('mousemove', e => {
   if (!teclaArrastando || !corpoArrastado || !elArrastado) return;
   const sz = parseInt(elArrastado.style.width);
-  elArrastado.style.left = (e.clientX - sz / 2) + 'px';
-  elArrastado.style.top  = (e.clientY - sz / 2) + 'px';
-  Matter.Body.setPosition(corpoArrastado, { x: e.clientX, y: e.clientY });
+  const lx = e.clientX - teclaOffset.x;
+  const ly = e.clientY - teclaOffset.y;
+  elArrastado.style.left = (lx - sz / 2) + 'px';
+  elArrastado.style.top  = (ly - sz / 2) + 'px';
+  Matter.Body.setPosition(corpoArrastado, { x: lx, y: ly });
 });
 
 window.addEventListener('mouseup', () => {
@@ -24,8 +27,8 @@ window.addEventListener('mouseup', () => {
     elArrastado.style.cursor = 'grab';
   }
   Matter.Body.setPosition(corpoArrastado, {
-    x: parseFloat(elArrastado.style.left) + 30,
-    y: parseFloat(elArrastado.style.top) + 30
+    x: parseFloat(elArrastado.style.left) + size / 2,
+    y: parseFloat(elArrastado.style.top)  + size / 2
   });
   Matter.Body.setAngle(corpoArrastado, 0);
   Matter.Body.setStatic(corpoArrastado, false);
@@ -33,6 +36,7 @@ window.addEventListener('mouseup', () => {
   teclaArrastando = false;
   corpoArrastado = null;
   elArrastado = null;
+  teclaOffset = { x: 0, y: 0 };
 });
 
 window.addEventListener('scroll', () => {
@@ -97,11 +101,8 @@ function iniciarFisica() {
   corposAtual.forEach(({ corpo, id }) => {
     const el = document.getElementById(id);
     el.addEventListener('mousedown', (e) => {
-      const rect = el.getBoundingClientRect();
-      el.style.position = 'fixed';
-      el.style.left = rect.left + 'px';
-      el.style.top  = rect.top  + 'px';
-      document.body.appendChild(el);
+      const cr = document.getElementById('teclas-container').getBoundingClientRect();
+      teclaOffset = { x: cr.left, y: cr.top };
       teclaArrastando = true;
       teclaLastX = e.clientX;
       teclaLastY = e.clientY;
@@ -112,7 +113,6 @@ function iniciarFisica() {
       Body.setAngularVelocity(corpo, 0);
       el.style.transition = 'none';
       el.style.cursor = 'grabbing';
-      el.style.zIndex = '999';
       e.preventDefault();
     });
   });
