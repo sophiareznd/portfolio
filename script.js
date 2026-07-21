@@ -89,8 +89,8 @@ function iniciarFisica() {
   letras.forEach((letra, i) => {
     const col = i % 3;
     const row = Math.floor(i / 3);
-    const x = W * 0.72 + col * (sz + 30) + Math.random() * 30;
-    const y = -100 - row * 200 - Math.random() * 80;
+    const x = W * 0.60 + col * (sz + 100) + Math.random() * 60;
+    const y = -150 - row * 350 - Math.random() * 120;
     const angulo = (Math.random() - 0.5) * 2;
 
     const corpo = Bodies.rectangle(x, y, sz, sz, {
