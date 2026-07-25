@@ -425,6 +425,11 @@ nav ul li a.ativa {
     padding-right: 24px;
   }
 
+  .projetos-lista {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px 16px;
+  }
+
   .projetos-grid {
     position: static;
     width: 100%;
