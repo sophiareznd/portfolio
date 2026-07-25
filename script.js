@@ -208,16 +208,16 @@ const projetos = [
     descricao: '++ (mais mais) é uma revista impressa criada a partir do tema consumo, desenvolvida com base em pesquisas extensas de público-alvo, incluindo mapa de empatia, formulários aplicados em pontos frequentados pelo público-alvo, análise PESTEL, pesquisa de concorrência e tabela de conteúdo comparativa. O desafio era questionar tanto o valor quanto o modo como a geração Z consome informação digitalmente, e a resposta foi uma publicação que propõe o oposto do feed: desacelerar, ler com intenção, ficar com o que realmente importa.<br><br>O projeto foi premiado na Mostra Estudantil da ESPM, que reconhece os melhores trabalhos do curso durante o ano. O nome parte da repetição para provocar. O símbolo ++ evoca o excesso da era digital e, ao mesmo tempo, propõe uma ruptura: não mais do mesmo, mas mais consciência, mais qualidade, mais intenção. A revista não é contra o consumo digital, mas contra o consumo acelerado e sem reflexão. Por ser impressa, existe como objeto desejado por si só, um investimento de tempo e atenção em um contexto onde a leitura virou distração.',
     descricao_en: '++ (mais mais) is a printed magazine created around the theme of consumption, developed based on extensive target-audience research, including empathy mapping, questionnaires applied at locations frequented by the target audience, PESTEL analysis, competitive research, and comparative content tables. The challenge was to question both the value and the way Generation Z consumes information digitally, and the answer was a publication that proposes the opposite of the feed: slow down, read with intention, keep what truly matters.<br><br>The project won an award at the ESPM Student Exhibition, which recognizes the best works of the year. The name plays on repetition to provoke. The ++ symbol evokes the excess of the digital era while simultaneously proposing a rupture: not more of the same, but more awareness, more quality, more intention. The magazine is not against digital consumption, but against accelerated and unreflective consumption. As a printed object, it exists as something desirable in itself — an investment of time and attention in a context where reading has become distraction.',
     imagens: [
-      'imagens/projetos/maismais/fotos-01.png',
-      'imagens/projetos/maismais/fotos-02.png',
-      'imagens/projetos/maismais/fotos-03.png',
-      'imagens/projetos/maismais/fotos-04.png',
+      'imagens/projetos/maismais/fotos-01.webp',
+      'imagens/projetos/maismais/fotos-02.jpg',
+      'imagens/projetos/maismais/fotos-03.jpg',
+      'imagens/projetos/maismais/fotos-04.jpg',
       'imagens/projetos/maismais/fotos-05.jpg',
-      'imagens/projetos/maismais/fotos-06.png',
-      'imagens/projetos/maismais/fotos-07.png',
-      'imagens/projetos/maismais/fotos-08.png',
-      'imagens/projetos/maismais/fotos-09.png',
-      'imagens/projetos/maismais/fotos-10.png'
+      'imagens/projetos/maismais/fotos-06.jpg',
+      'imagens/projetos/maismais/fotos-07.jpg',
+      'imagens/projetos/maismais/fotos-08.jpg',
+      'imagens/projetos/maismais/fotos-09.jpg',
+      'imagens/projetos/maismais/fotos-10.jpg'
     ]
   },
   {
