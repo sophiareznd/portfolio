@@ -93,6 +93,7 @@ nav ul li a.ativa {
   right: 5%;
   width: 45%;
   height: 60%;
+  visibility: hidden;
 }
 
 .tecla {
