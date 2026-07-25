@@ -349,21 +349,21 @@ nav ul li a.ativa {
 
   /* NAV */
   nav {
-    padding: 0 60px;
-    height: 70px;
+    padding: 0 20px;
+    height: 55px;
   }
 
   nav ul {
-    padding-left: 16px;
-    gap: 0;
+    padding-left: 0;
+    gap: 16px;
   }
 
   nav ul li a {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   nav .logo img {
-    width: 32px;
+    width: 28px;
   }
 
   /* PÁGINAS */

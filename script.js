@@ -69,7 +69,7 @@ function iniciarFisica() {
 
   const W = window.innerWidth;
   const H = window.innerHeight;
-  const sz = 86;
+  const sz = W < 768 ? 48 : 86;
 
   const engine = Engine.create();
   engine.gravity.y = 3;
@@ -89,8 +89,12 @@ function iniciarFisica() {
   letras.forEach((letra, i) => {
     const col = i % 3;
     const row = Math.floor(i / 3);
-    const x = W * 0.60 + col * (sz + 100) + Math.random() * 60;
-    const y = -150 - row * 350 - Math.random() * 120;
+    const x = W < 768
+      ? W * 0.15 + col * (sz + 24) + Math.random() * 20
+      : W * 0.60 + col * (sz + 100) + Math.random() * 60;
+    const y = W < 768
+      ? -80 - row * 200 - Math.random() * 60
+      : -150 - row * 350 - Math.random() * 120;
     const angulo = (Math.random() - 0.5) * 2;
 
     const corpo = Bodies.rectangle(x, y, sz, sz, {
