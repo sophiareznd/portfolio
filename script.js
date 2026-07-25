@@ -531,7 +531,7 @@ let idioma = 'pt';
 function alternarIdioma() {
   idioma = idioma === 'pt' ? 'en' : 'pt';
   const btn = event.target;
-  btn.textContent = idioma === 'pt' ? 'PT-BR' : 'ENG';
+  btn.textContent = idioma === 'pt' ? 'ENG' : 'PT-BR';
 
   document.querySelectorAll('[data-pt][data-en]').forEach(el => {
     const texto = idioma === 'pt' ? el.dataset.pt : el.dataset.en;
