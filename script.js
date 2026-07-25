@@ -69,7 +69,7 @@ function iniciarFisica() {
 
   const W = window.innerWidth;
   const H = window.innerHeight;
-  const sz = W < 768 ? 58 : 86;
+  const sz = W < 768 ? 75 : 86;
 
   const engine = Engine.create();
   engine.gravity.y = 3;
