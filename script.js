@@ -1,6 +1,3 @@
-let engineAtual = null;
-let runnerAtual = null;
-let corposAtual = [];
 const size = 70;
 const teclaIds = ['tecla-s', 'tecla-o', 'tecla-a', 'tecla-p', 'tecla-h', 'tecla-i'];
 let corpoArrastado = null;
@@ -46,110 +43,196 @@ window.addEventListener('scroll', () => {
   }
 });
 
-function iniciarFisica() {
-  const { Engine, Runner, Bodies, Body, World, Events } = Matter;
+// HOME: os quadrados começam empilhados no centro; ao passar o mouse (ou tocar) eles se abrem
+// numa fila diagonal (de cima à esquerda para baixo à direita) que desliza sozinha.
+// Rolar ou arrastar também move a fila; clicar no fundo branco empilha de novo.
+// Por enquanto cores chapadas das teclas.
+const filaCores = ['#FF568D', '#A2D7F6', '#8FF862', '#F9B4E1', '#F6CFF7', '#DCDCDC', '#F7DFE7'];
+const FILA_N = 16;
+let fila = [];             // { el, bx, by, br } — bx/by/br: desalinho do quadrado na pilha
+let filaPos = 0, filaVel = 0;
+let filaAberta = false;
+let filaDe = 0;            // de onde a animação atual partiu
+let filaMudouEm = 0;       // momento em que começou a abrir/fechar
+let filaQuadro = null;
+let filaArrasto = null;
+let filaMov = null;        // passo automático atual: { de, para, inicio }
+let filaSobre = null;      // quadrado com o mouse em cima (a fila para e ele sobe um pouquinho)
+let filaUltimo = 0;
 
-  if (engineAtual) {
-    Runner.stop(runnerAtual);
-    World.clear(engineAtual.world);
-    Engine.clear(engineAtual);
-    engineAtual = null;
+function iniciarFila() {
+  const cena = document.getElementById('fila');
+  if (!fila.length) {
+    for (let i = 0; i < FILA_N; i++) {
+      const el = document.createElement('div');
+      el.className = 'fila-item';
+      el.style.background = filaCores[i % filaCores.length];
+      el.addEventListener('pointerenter', e => {
+        // logo depois de empilhar, os quadrados passam sob o mouse parado: isso não deve reabrir
+        if (performance.now() - filaMudouEm > 1300) abrirFila();
+        if (filaTodaAberta() && e.pointerType === 'mouse') filaSobre = el;
+      });
+      cena.appendChild(el);
+      // na pilha fechada cada quadrado fica um pouco torto e deslocado, para os de trás aparecerem
+      el.addEventListener('pointermove', e => {
+        if (filaTodaAberta() && e.pointerType === 'mouse' && !filaArrasto) filaSobre = el;
+      });
+      el.addEventListener('pointerleave', () => { if (filaSobre === el) filaSobre = null; });
+      fila.push({ el, ergue: 0, bx: (Math.random() - 0.5) * 0.16, by: (Math.random() - 0.5) * 0.12, br: (Math.random() - 0.5) * 9 });
+    }
+    cena.addEventListener('wheel', e => {
+      e.preventDefault();
+      if (filaTodaAberta()) { filaInterromperPasso(); filaVel += (e.deltaY + e.deltaX) / 3000; }
+      else abrirFila();
+    }, { passive: false });
+    cena.addEventListener('pointerdown', e => {
+      if (!filaTodaAberta()) { abrirFila(); return; } // no celular, o toque abre
+      filaInterromperPasso();
+      filaArrasto = { x: e.clientX, y: e.clientY, pos: filaPos, fundo: e.target === cena, moveu: false };
+      filaVel = 0;
+      cena.setPointerCapture(e.pointerId);
+      cena.classList.add('arrastando');
+    });
+    cena.addEventListener('pointermove', e => {
+      if (!filaArrasto) return;
+      // arrastar ao longo da diagonal (para baixo/direita avança a fila)
+      const passo = filaTamanho() * 0.55;
+      const anterior = filaPos;
+      if (Math.abs(e.clientX - filaArrasto.x) + Math.abs(e.clientY - filaArrasto.y) > 6) filaArrasto.moveu = true;
+      filaPos = filaArrasto.pos + ((e.clientX - filaArrasto.x) + (e.clientY - filaArrasto.y)) / (2 * passo);
+      filaVel = filaPos - anterior;
+    });
+    const soltar = () => {
+      if (!filaArrasto) return;
+      // um clique (sem arrastar) no fundo branco empilha os quadrados de novo
+      if (filaArrasto.fundo && !filaArrasto.moveu) fecharFila();
+      filaArrasto = null;
+      cena.classList.remove('arrastando');
+    };
+    cena.addEventListener('pointerup', soltar);
+    cena.addEventListener('pointercancel', soltar);
   }
+  // toda vez que a home aparece, os quadrados voltam empilhados
+  filaAberta = false;
+  filaDe = 0;
+  filaMov = null;
+  filaSobre = null;
+  filaPos = Math.round(filaPos);
+  fila.forEach(q => { q.abre = 0; q.pulo = 0; });
+  filaVel = 0;
+  if (!filaQuadro) filaQuadro = requestAnimationFrame(animarFila);
+}
 
-  const overlayAnt = document.getElementById('teclas-home-overlay');
-  if (overlayAnt) overlayAnt.remove();
+function abrirFila() {
+  if (filaAberta) return;
+  filaAberta = true;
+  filaDe = Math.max(...fila.map(q => q.abre));
+  filaMudouEm = performance.now();
+}
 
-  const container = document.getElementById('teclas-container');
-  if (container) container.style.visibility = 'hidden';
+function fecharFila() {
+  if (!filaAberta) return;
+  filaAberta = false;
+  filaDe = Math.min(...fila.map(q => q.abre));
+  filaMudouEm = performance.now();
+  filaVel = 0;
+  filaMov = null;
+  filaSobre = null;
+}
 
-  const overlay = document.createElement('div');
-  overlay.id = 'teclas-home-overlay';
-  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:10;overflow:hidden;';
-  document.body.appendChild(overlay);
+function filaTodaAberta() {
+  return filaAberta && fila.every(q => q.abre > 0.98);
+}
 
-  const W = window.innerWidth;
-  const H = window.innerHeight;
-  const sz = W < 768 ? 75 : 86;
+// durante um passo automático, cada quadrado anda com um pequeno atraso em relação ao de cima:
+// o movimento começa no alto da tela e vai descendo como uma onda
+// cada step (pausa + onda inteira) dura 1s: 120 + 600 + 20 × 14
+const FILA_PASSO = 600, FILA_ONDA = 20; // ms: duração do passo de cada quadrado; atraso entre vizinhos
+function filaKAgora(i, agora) {
+  if (!filaMov) return filaK(i);
+  const k0 = filaK(i);
+  const atraso = Math.min(Math.max(k0 + 6, 0), FILA_N) * FILA_ONDA;
+  const p = Math.min(1, Math.max(0, (agora - filaMov.inicio - atraso) / FILA_PASSO));
+  const suave = 0.5 - Math.cos(Math.PI * p) / 2; // curva senoidal: entra e sai bem macio
+  const pos = filaMov.de + (filaMov.para - filaMov.de) * suave;
+  return (((i + pos) % FILA_N) + FILA_N) % FILA_N - FILA_N / 2;
+}
 
-  const engine = Engine.create();
-  engine.gravity.y = 3;
-  const runner = Runner.create();
-  engineAtual = engine;
-  runnerAtual = runner;
-  Runner.run(runner, engine);
+// ao rolar/arrastar no meio de um passo, a fila assume a posição do quadrado do meio da tela
+function filaInterromperPasso() {
+  if (!filaMov) return;
+  const meio = fila.findIndex((q, i) => Math.round(filaK(i)) === 0);
+  filaPos += filaKAgora(meio, performance.now()) - filaK(meio);
+  filaMov = null;
+}
 
-  const chao = Bodies.rectangle(W/2, H + 25, W, 50, { isStatic: true });
-  const paredeDir = Bodies.rectangle(W + 25, H/2, 50, H * 3, { isStatic: true });
-  const paredeEsq = Bodies.rectangle(-25, H/2, 50, H * 3, { isStatic: true });
-  World.add(engine.world, [chao, paredeDir, paredeEsq]);
+function filaK(i) {
+  return (((i + filaPos) % FILA_N) + FILA_N) % FILA_N - FILA_N / 2; // 0 = centro da tela
+}
 
-  const letras = ['s', 'o', 'p', 'h', 'i', 'a'];
-  const pares = [];
+function pararFila() {
+  cancelAnimationFrame(filaQuadro);
+  filaQuadro = null;
+}
 
-  letras.forEach((letra, i) => {
-    const col = i % 3;
-    const row = Math.floor(i / 3);
-    const x = W < 768
-      ? W * 0.15 + col * (sz + 24) + Math.random() * 20
-      : W * 0.60 + col * (sz + 100) + Math.random() * 60;
-    const y = W < 768
-      ? -80 - row * 200 - Math.random() * 60
-      : -150 - row * 350 - Math.random() * 120;
-    const angulo = (Math.random() - 0.5) * 2;
+function filaTamanho() {
+  return Math.min(window.innerWidth, window.innerHeight) * (window.innerWidth < 768 ? 0.42 : 0.3);
+}
 
-    const corpo = Bodies.rectangle(x, y, sz, sz, {
-      restitution: 0, friction: 0.9, frictionAir: 0.05, angle: angulo
-    });
-
-    const el = document.createElement('img');
-    el.src = `imagens/teclas/teclas-${letra}.png`;
-    el.style.cssText = `position:absolute;width:${sz}px;cursor:grab;pointer-events:auto;user-select:none;-webkit-user-drag:none;`;
-    overlay.appendChild(el);
-
-    el.addEventListener('mousedown', (ev) => {
-      Body.setStatic(corpo, true);
-      Body.setVelocity(corpo, { x: 0, y: 0 });
-      Body.setAngularVelocity(corpo, 0);
-      elArrastado = el;
-      el.style.cursor = 'grabbing';
-      el.style.animation = 'tecla-wiggle 0.4s ease infinite alternate';
-      ev.preventDefault();
-
-      const onMove = (ev) => {
-        el.style.left = (ev.clientX - sz / 2) + 'px';
-        el.style.top  = (ev.clientY - sz / 2) + 'px';
-        Body.setPosition(corpo, { x: ev.clientX, y: ev.clientY });
-      };
-      const onUp = () => {
-        el.style.animation = '';
-        el.style.cursor = 'grab';
-        Body.setPosition(corpo, {
-          x: parseFloat(el.style.left) + sz / 2,
-          y: parseFloat(el.style.top)  + sz / 2
-        });
-        Body.setAngle(corpo, 0);
-        Body.setStatic(corpo, false);
-        Body.setVelocity(corpo, { x: 0, y: 0 });
-        elArrastado = null;
-        window.removeEventListener('mousemove', onMove);
-        window.removeEventListener('mouseup', onUp);
-      };
-      window.addEventListener('mousemove', onMove);
-      window.addEventListener('mouseup', onUp);
-    });
-
-    pares.push({ corpo, el });
-    World.add(engine.world, corpo);
+function animarFila(agora) {
+  // curva de mola criticamente amortecida, como as animações do iOS: começa suave,
+  // desacelera e assenta sem quicar (~0,9s).
+  // Ao abrir, cada quadrado sai um pouquinho depois do de cima e dá um pulinho até o lugar na fila;
+  // ao fechar, o mesmo movimento ao contrário (o último a abrir é o primeiro a voltar).
+  const w = 7;
+  fila.forEach((q, i) => {
+    const ordem = FILA_N / 2 - 1 - filaK(i);
+    const atraso = (filaAberta ? ordem : FILA_N - 1 - ordem) * 0.022;
+    const s = Math.max(0, ((agora || 0) - filaMudouEm) / 1000 - atraso);
+    const curva = filaMudouEm ? 1 - (1 + w * s) * Math.exp(-w * s) : 1;
+    q.abre = filaDe + ((filaAberta ? 1 : 0) - filaDe) * curva;
+    q.pulo = (filaAberta ? filaDe < 0.5 : filaDe > 0.5) ? Math.sin(Math.PI * curva) : 0;
   });
-
-  Events.on(engine, 'afterUpdate', () => {
-    pares.forEach(({ corpo, el }) => {
-      if (el === elArrastado) return;
-      el.style.left = (corpo.position.x - sz/2) + 'px';
-      el.style.top  = (corpo.position.y - sz/2) + 'px';
-      el.style.transform = `rotate(${corpo.angle}rad)`;
-    });
+  // a fila só anda depois de totalmente aberta (assim nenhum quadrado "pula" de ponta a ponta à vista)
+  // passar o mouse num quadrado congela a fila (o passo atual é adiado enquanto o mouse estiver em cima)
+  const dt = filaUltimo ? agora - filaUltimo : 0;
+  filaUltimo = agora;
+  if (filaSobre && filaMov) filaMov.inicio += dt;
+  if (filaTodaAberta() && !filaArrasto) {
+    if (Math.abs(filaVel) > 0.0008) {
+      // embalo de quando rolou/arrastou
+      filaPos += filaVel;
+      filaVel *= 0.92;
+      filaMov = null;
+    } else if (!filaSobre) {
+      // anda sozinha aos passos: cada quadrado para um instante no meio da tela e o próximo chega
+      filaVel = 0;
+      const PAUSA = 120; // ms
+      if (!filaMov) {
+        const inteiro = Math.abs(filaPos - Math.round(filaPos)) < 0.001;
+        filaMov = inteiro
+          ? { de: filaPos, para: Math.round(filaPos) + 1, inicio: agora + PAUSA }
+          : { de: filaPos, para: Math.ceil(filaPos), inicio: agora }; // termina o passo até o próximo quadrado
+      }
+      // o passo termina quando o último quadrado (o de baixo) chega
+      if (agora - filaMov.inicio >= FILA_PASSO + FILA_ONDA * (FILA_N / 2 + 6)) { filaPos = filaMov.para; filaMov = null; }
+    }
+  }
+  const W = window.innerWidth, H = window.innerHeight;
+  const t = filaTamanho();
+  const mobile = W < 768; // no celular a diagonal fica mais em pé
+  const dx = t * (mobile ? 0.34 : 0.6), dy = t * (mobile ? 0.55 : 0.5);
+  fila.forEach(q => { q.ergue += ((filaSobre === q.el ? 1 : 0) - q.ergue) * 0.14; });
+  fila.forEach((q, i) => {
+    const k = filaKAgora(i, agora);
+    const solto = 1 - q.abre; // desalinho só na pilha; some conforme abre
+    const x = W / 2 + k * dx * q.abre + q.bx * t * solto - t / 2;
+    const y = H / 2 + k * dy * q.abre + q.by * t * solto - q.pulo * t * 0.42 - q.ergue * t * 0.16 - t / 2;
+    q.el.style.width = q.el.style.height = t + 'px';
+    q.el.style.transform = `translate(${x}px, ${y}px) rotate(${q.br * solto}deg)`;
+    q.el.style.zIndex = Math.round((k + FILA_N) * 10);
   });
+  filaQuadro = requestAnimationFrame(animarFila);
 }
 
 function mostrarPagina(id) {
@@ -159,24 +242,15 @@ function mostrarPagina(id) {
     const overlay = document.getElementById('teclas-sobre-container');
     if (overlay) overlay.remove();
   }
-  if (id !== 'home') {
-    const homeOverlay = document.getElementById('teclas-home-overlay');
-    if (homeOverlay) homeOverlay.remove();
-    if (engineAtual) {
-      Matter.Runner.stop(runnerAtual);
-      Matter.World.clear(engineAtual.world);
-      Matter.Engine.clear(engineAtual);
-      engineAtual = null;
-    }
-  }
 
+  if (id !== 'home') pararFila();
   document.querySelectorAll('.pagina').forEach(p => p.classList.remove('ativa'));
   document.getElementById(id).classList.add('ativa');
   document.querySelectorAll('nav ul li a').forEach(a => a.classList.remove('ativa'));
   if (event && event.target) event.target.classList.add('ativa');
   if (id === 'home') {
     document.body.classList.add('home-ativa');
-    iniciarFisica();
+    iniciarFila();
   } else {
     document.body.classList.remove('home-ativa');
   }
@@ -943,4 +1017,4 @@ function alternarIdioma() {
 }
 
 document.body.classList.add('home-ativa');
-iniciarFisica();
+iniciarFila();
