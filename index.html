@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sophia Rezende</title>
   <link rel="icon" type="image/png" href="imagens/teclas/teclas-s.png">
-  <link rel="stylesheet" href="style.css?v=19">
+  <link rel="stylesheet" href="style.css?v=46">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 </head>
 <body>
 
@@ -54,10 +55,7 @@
         <p>Motion Design</p>
         <p>Web Design e UX/UI</p>
         <p>Social Media</p>
-      </div>
-      <div class="sobre-contato">
-        <p class="sobre-titulo" data-pt="Contato" data-en="Contact">Contato</p>
-        <p><a href="https://behance.net/sophiarezende" target="_blank">behance.net/sophiarezende</a></p>
+        <button class="cv-btn" onclick="abrirCurriculo()" data-pt="Currículo" data-en="Résumé">Currículo</button>
       </div>
     </div>
   </section>
@@ -66,74 +64,98 @@
   <section id="projetos" class="pagina">
     <div class="projetos-lista">
       <div class="projeto-card" onclick="abrirProjeto('maismais')">
-        <img src="imagens/capas/capa-maismais.webp" alt="Revista ++">
+        <video src="imagens/capas/capa-maismais.mp4" poster="imagens/capas/capa-maismais.webp" autoplay muted loop playsinline aria-label="Revista ++"></video>
         <p class="card-titulo">Revista ++</p>
-        <p class="card-ano">2025</p>
+        <p class="card-desc" data-pt="Revista impressa sobre consumo digital." data-en="A printed magazine about digital consumption.">Revista impressa sobre consumo digital.</p>
       </div>
       <div class="projeto-card" onclick="abrirProjeto('cosmo')">
         <img src="imagens/capas/capa-cosmo.webp" alt="Cosmo Font">
         <p class="card-titulo">Cosmo Font</p>
-        <p class="card-ano">2025</p>
+        <p class="card-desc" data-pt="Tipografia inspirada em taças de coquetel." data-en="A typeface inspired by cocktail glasses.">Tipografia inspirada em taças de coquetel.</p>
       </div>
       <div class="projeto-card" onclick="abrirProjeto('kitkat')">
         <img src="imagens/capas/capa-kitkat.jpg" alt="KitKat Sugar Rush">
         <p class="card-titulo">KitKat Sugar Rush</p>
-        <p class="card-ano">2025</p>
-      </div>
-      <div class="projeto-card" onclick="abrirProjeto('sinapse')">
-        <img src="imagens/capas/capa-sinapse.jpg" alt="Sinapse">
-        <p class="card-titulo">Sinapse</p>
-        <p class="card-ano">2026</p>
-      </div>
-      <div class="projeto-card" onclick="abrirProjeto('emilie')">
-        <img src="imagens/capas/capa-emilie.webp" alt="Premiação Emilie Chamie">
-        <p class="card-titulo">Premiação Emilie Chamie e Mostra Estudantil</p>
-        <p class="card-ano">2025</p>
+        <p class="card-desc" data-pt="Linha de produtos ValueUp para a Nestlé." data-en="ValueUp product line for Nestlé.">Linha de produtos ValueUp para a Nestlé.</p>
       </div>
       <div class="projeto-card" onclick="abrirProjeto('ama')">
         <img src="imagens/capas/capa-ama.jpg" alt="AMA">
         <p class="card-titulo">AMA</p>
-        <p class="card-ano">2024</p>
+        <p class="card-desc" data-pt="Nova identidade visual para uma associação de apoio a pessoas autistas." data-en="A new visual identity for an association supporting autistic people.">Nova identidade visual para uma associação de apoio a pessoas autistas.</p>
+      </div>
+      <div class="projeto-card" onclick="abrirProjeto('emilie')">
+        <img src="imagens/capas/capa-emilie.webp" alt="Premiação Emilie Chamie">
+        <p class="card-titulo">Premiação Emilie Chamie e Mostra Estudantil</p>
+        <p class="card-desc" data-pt="Identidade visual para dois eventos do curso de Design da ESPM." data-en="Visual identity for two events of the ESPM Design program.">Identidade visual para dois eventos do curso de Design da ESPM.</p>
+      </div>
+      <div class="projeto-card" onclick="abrirProjeto('sinapse')">
+        <video class="capa-contida" src="imagens/capas/capa-sinapse.mp4" autoplay muted loop playsinline aria-label="Sinapse"></video>
+        <p class="card-titulo">Sinapse</p>
+        <p class="card-desc" data-pt="Site experimental sobre São Paulo através dos cinco sentidos." data-en="An experimental website about São Paulo through the five senses.">Site experimental sobre São Paulo através dos cinco sentidos.</p>
       </div>
       <div class="projeto-card" onclick="abrirProjeto('jagerbomb')">
         <img src="imagens/capas/capa-jagerbomb.webp" alt="Jägerbomb">
         <p class="card-titulo">Jägerbomb</p>
-        <p class="card-ano">2025</p>
+        <p class="card-desc" data-pt="Identidade visual para uma banda independente." data-en="Visual identity for an independent band.">Identidade visual para uma banda independente.</p>
       </div>
       <div class="projeto-card" onclick="abrirProjeto('anjos')">
         <img src="imagens/capas/capa-anjos-e-fadas.jpg" alt="Anjos e Fadas">
         <p class="card-titulo">Anjos e Fadas</p>
-        <p class="card-ano">2025–atualmente</p>
+        <p class="card-desc" data-pt="Social media voluntária para uma organização de proteção animal." data-en="Volunteer social media for an animal protection organization.">Social media voluntária para uma organização de proteção animal.</p>
       </div>
       <div class="projeto-card" onclick="abrirProjeto('seposicione')">
         <img src="imagens/capas/capa-seposicione.jpg" alt="SePosicione">
         <p class="card-titulo">SePosicione</p>
-        <p class="card-ano">2025</p>
+        <p class="card-desc" data-pt="Intervenção urbana interativa sobre o futuro do Minhocão." data-en="An interactive urban intervention about the future of the Minhocão.">Intervenção urbana interativa sobre o futuro do Minhocão.</p>
       </div>
     </div>
   </section>
 
-  <!-- PROJETO ABERTO -->
-  <section id="projeto-aberto" class="pagina">
-    <div class="projeto-layout">
-      <div class="projeto-imagens" id="projeto-imagens"></div>
-      <div class="projeto-info">
-        <h1 class="projeto-titulo" id="projeto-titulo"></h1>
-        <p class="projeto-ano"    id="projeto-ano"></p>
-        <p class="projeto-areas"  id="projeto-areas"></p>
-        <p class="projeto-desc"   id="projeto-desc"></p>
-        <div class="projeto-nav">
-          <span class="projeto-seta" onclick="navegarProjeto(-1)">←</span>
-          <span class="projeto-seta" onclick="navegarProjeto(1)">→</span>
+  <!-- PROJETO EXPANDIDO (novo layout) -->
+  <section id="projeto-expandido" class="pagina">
+    <header class="exp-header">
+      <h1 class="exp-titulo" id="exp-titulo"></h1>
+      <div class="exp-header-linha">
+        <div>
+          <p class="exp-subtitulo" id="exp-subtitulo"></p>
+          <ul class="exp-tags" id="exp-tags"></ul>
         </div>
+        <button class="exp-about-btn" id="exp-about-btn" onclick="alternarAbout()">
+          <span data-pt="Sobre o projeto" data-en="About the project">Sobre o projeto</span>
+          <span class="exp-about-icone">+</span>
+        </button>
       </div>
+    </header>
+    <div class="exp-corpo" id="exp-corpo">
+      <div class="exp-imagens" id="exp-imagens"></div>
+      <aside class="exp-about">
+        <div class="exp-about-inner">
+          <div class="exp-desc" id="exp-desc"></div>
+          <div class="exp-meta" id="exp-meta"></div>
+        </div>
+      </aside>
+    </div>
+    <div class="exp-nav">
+      <span class="exp-nav-link" onclick="navegarProjeto(-1)">← <span id="exp-anterior"></span></span>
+      <span class="exp-nav-link" onclick="navegarProjeto(1)"><span id="exp-proximo"></span> →</span>
     </div>
   </section>
+
+  <!-- CURRÍCULO: na aba Sobre mim fica só a pontinha embaixo; arrasta (ou clica) para trazer ao centro -->
+  <div id="curriculo">
+    <img src="imagens/curriculo/curriculo.jpg" alt="Currículo de Sophia Rezende" draggable="false">
+    <!-- áreas clicáveis sobre os links do currículo (o PDF original não tem links de verdade) -->
+    <a class="cv-link" style="left:22.6%;top:12.6%;width:21.2%;height:1.9%" href="mailto:sophiarp13@gmail.com" aria-label="E-mail"></a>
+    <a class="cv-link" style="left:45.4%;top:12.6%;width:25.5%;height:1.9%" href="https://www.behance.net/sophiarezende" target="_blank" aria-label="Behance"></a>
+    <a class="cv-link" style="left:71.9%;top:12.6%;width:17.2%;height:1.9%" href="https://sophiareznd.github.io/portfolio/" target="_blank" aria-label="Portfólio"></a>
+    <a class="cv-link" style="left:5.9%;top:24.5%;width:9.1%;height:1.9%" href="https://agenciatbrands.com" target="_blank" aria-label="TBrands"></a>
+    <a class="cv-link" style="left:5.9%;top:70.1%;width:9.9%;height:1.9%" href="#" onclick="fecharCurriculo(); abrirProjeto('maismais'); return false;" aria-label="Revista ++"></a>
+  </div>
 
   <div id="lightbox" onclick="fecharLightbox()">
     <img id="lightbox-img" src="">
   </div>
 
-  <script src="script.js?v=21"></script>
+  <script src="script.js?v=64"></script>
 </body>
 </html>
