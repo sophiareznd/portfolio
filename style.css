@@ -543,6 +543,17 @@ nav ul li a.ativa {
   min-width: 0;
 }
 
+/* olho de texto: citação grande com a aspa de abertura "pendurada" fora da margem */
+.exp-olho {
+  max-width: 75%;
+  margin: 24px 0;
+  font-size: clamp(28px, 3vw, 44px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #222;
+  text-indent: -0.4em;
+}
+
 .exp-par {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -824,6 +835,12 @@ nav ul li a.ativa {
 
   .exp-par {
     grid-template-columns: 1fr;
+  }
+
+  .exp-olho {
+    max-width: 100%;
+    margin: 16px 0;
+    font-size: 24px;
   }
 
   .exp-menor {

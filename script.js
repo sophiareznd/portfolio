@@ -236,11 +236,13 @@ const projetos = [
       'imagens/projetos/maismais/fotos-01.webp',
       'imagens/projetos/maismais/video-02-digitacao.mp4',
       { src: 'imagens/projetos/maismais/fotos-revista-aberta.jpg', menor: true },
-      'imagens/projetos/maismais/fotos-02.jpg',
+      { src: 'imagens/projetos/maismais/fotos-02.jpg', largura: 90 },
+      { olho: '“Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.”' },
       ['imagens/projetos/maismais/fotos-03.jpg', 'imagens/projetos/maismais/fotos-04.jpg'],
       'imagens/projetos/maismais/video-grid.mp4',
-      { src: 'imagens/projetos/maismais/fotos-leitura.jpg', largura: 80 },
-      { src: 'imagens/projetos/maismais/fotos-outdoor.jpg', largura: 70 },
+      { src: 'imagens/projetos/maismais/fotos-leitura.jpg', largura: 70 },
+      { src: 'imagens/projetos/maismais/fotos-adesivos.jpg?v=2', menor: true },
+      { src: 'imagens/projetos/maismais/fotos-outdoor.jpg', largura: 87 },
       { src: 'imagens/projetos/maismais/fotos-caminhando.jpg', menor: true },
       'imagens/projetos/maismais/video-01.mp4',
       { revista: 'imagens/projetos/maismais/revista', paginas: 108, tamanho: [500, 625] }
@@ -477,6 +479,7 @@ function renderizarExpandido() {
   // { src, menor: true } = menor e alinhada à esquerda; .mp4 vira vídeo em loop;
   // { src, largura: 30 } = 30% da largura, também alinhada à esquerda;
   // { par: [a, b], largura } = lado a lado com a mesma altura, mesmo com formatos diferentes;
+  // { olho: 'texto' } = olho de texto (citação grande, estilo Pentagram);
   // { revista: pasta, paginas } = leitor folheável
   destruirRevista();
   const container = document.getElementById('exp-imagens');
@@ -484,6 +487,13 @@ function renderizarExpandido() {
   p.imagens.forEach(item => {
     if (item.revista) {
       container.appendChild(criarRevista(item));
+      return;
+    }
+    if (item.olho) {  // { olho: 'texto', olho_en } = citação grande no meio da galeria
+      const olho = document.createElement('blockquote');
+      olho.className = 'exp-olho';
+      olho.textContent = en && item.olho_en ? item.olho_en : item.olho;
+      container.appendChild(olho);
       return;
     }
     const linha = document.createElement('div');
@@ -601,13 +611,13 @@ function iniciarRevista() {
     width: w,
     height: h,
     size: 'stretch',
-    // abaixo de 2x minWidth (≈ celular) mostra uma página por vez
-    minWidth: 240,
+    // sempre página dupla, inclusive no celular (usePortrait: false)
+    minWidth: 100,
     maxWidth: w * 2,
-    minHeight: 240 * h / w,
+    minHeight: 100 * h / w,
     maxHeight: h * 2,
     showCover: true,
-    usePortrait: true,
+    usePortrait: false,
     mobileScrollSupport: true,
     maxShadowOpacity: 0.4,
     flippingTime: 800
