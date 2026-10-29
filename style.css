@@ -258,6 +258,7 @@ nav ul li a.ativa {
   display: block;
   object-fit: cover;
   aspect-ratio: 3 / 2;
+  border-radius: 10px;
   transition: opacity 0.2s ease;
 }
 
@@ -515,6 +516,7 @@ nav ul li a.ativa {
   display: block;
   width: 100%;
   height: auto;
+  border-radius: 10px;
 }
 
 .exp-linha img {
