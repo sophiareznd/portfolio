@@ -182,6 +182,8 @@ function mostrarPagina(id) {
   }
   // currículo só aparece quando pedem (palavra "Currículo"); trocar de aba guarda
   cvIr('escondido');
+  // vídeos das capas só começam a baixar quando a aba Projetos é aberta
+  if (id === 'projetos') carregarAdiados(document.getElementById('projetos'));
 }
 
 const projetos = [
@@ -424,6 +426,35 @@ function exibirProjetoAtual() {
   window.scrollTo(0, 0);
 }
 
+// vídeos das galerias: baixam quando chegam perto da tela e pausam quando saem dela.
+// Enquanto as fotos acima ainda carregam, a página fica "curta" e tudo parece perto do topo,
+// então o vídeo só baixa depois que as fotos antes dele já têm tamanho.
+function fotoAcimaPendente(v) {
+  return [...document.querySelectorAll('#exp-imagens img')].some(img =>
+    !img.complete && (img.compareDocumentPosition(v) & Node.DOCUMENT_POSITION_FOLLOWING));
+}
+
+function reavaliarVideos() {
+  document.querySelectorAll('#exp-imagens video[data-src]').forEach(v => {
+    observadorVideos.unobserve(v);
+    observadorVideos.observe(v);
+  });
+}
+
+const observadorVideos = new IntersectionObserver(entradas => {
+  entradas.forEach(({ target: v, isIntersecting }) => {
+    if (isIntersecting) {
+      if (v.dataset.src) {
+        if (fotoAcimaPendente(v)) return;
+        v.src = v.dataset.src; v.removeAttribute('data-src');
+      }
+      v.play().catch(() => {});
+    } else if (!v.paused) {
+      v.pause();
+    }
+  });
+}, { rootMargin: '400px 0px' });
+
 function renderizarExpandido() {
   const p = projetos[projetoAtualIndex];
   const en = idioma === 'en';
@@ -469,12 +500,12 @@ function renderizarExpandido() {
     [].concat(item).forEach(src => {
       if (src.endsWith('.mp4')) {
         const video = document.createElement('video');
-        video.src = src;
-        video.autoplay = true;
+        video.dataset.src = src;  // só baixa quando chega perto da tela (observadorVideos)
         video.muted = true;
         video.loop = true;
         video.playsInline = true;
         video.preload = 'metadata';
+        observadorVideos.observe(video);
         // controles (pausar, barra de tempo) só aparecem com o mouse em cima; no celular, ao tocar
         video.addEventListener('mouseenter', () => { video.controls = true; });
         video.addEventListener('mouseleave', () => { video.controls = false; });
@@ -493,6 +524,7 @@ function renderizarExpandido() {
       img.addEventListener('click', () => abrirLightbox(src));
       img.addEventListener('load', () => {
         img.style.flexGrow = img.naturalWidth / img.naturalHeight;
+        reavaliarVideos();
       });
       linha.appendChild(img);
     });
@@ -662,8 +694,17 @@ function cvPosicao(estado, hover) {
   return innerHeight + 40;
 }
 
+// troca data-src por src (arquivos que só devem baixar quando forem usados)
+function carregarAdiados(raiz) {
+  raiz.querySelectorAll('[data-src]').forEach(el => {
+    el.src = el.dataset.src;
+    el.removeAttribute('data-src');
+  });
+}
+
 function cvIr(estado) {
   const cv = document.getElementById('curriculo');
+  if (estado !== 'escondido') carregarAdiados(cv);
   cvEstado = estado;
   cv.classList.toggle('aberto', estado === 'aberto');
   cv.style.setProperty('--y', cvPosicao(estado) + 'px');
