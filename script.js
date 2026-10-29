@@ -239,8 +239,8 @@ const projetos = [
       'imagens/projetos/maismais/fotos-02.jpg',
       ['imagens/projetos/maismais/fotos-03.jpg', 'imagens/projetos/maismais/fotos-04.jpg'],
       'imagens/projetos/maismais/video-grid.mp4',
-      'imagens/projetos/maismais/fotos-leitura.jpg',
-      'imagens/projetos/maismais/fotos-outdoor.jpg',
+      { src: 'imagens/projetos/maismais/fotos-leitura.jpg', largura: 80 },
+      { src: 'imagens/projetos/maismais/fotos-outdoor.jpg', largura: 70 },
       { src: 'imagens/projetos/maismais/fotos-caminhando.jpg', menor: true },
       'imagens/projetos/maismais/video-01.mp4',
       { revista: 'imagens/projetos/maismais/revista', paginas: 108, tamanho: [500, 625] }
