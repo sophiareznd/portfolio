@@ -56,7 +56,8 @@ let filaDe = 0;            // de onde a animação atual partiu
 let filaMudouEm = 0;       // momento em que começou a abrir/fechar
 let filaQuadro = null;
 let filaArrasto = null;
-let filaMov = null;        // passo automático atual: { de, para, inicio }
+let filaFase = 0;          // fase da onda que percorre a fila (radianos)
+let filaForca = 0;         // 0 = fila uniforme, 1 = onda inteira
 let filaSobre = null;      // quadrado com o mouse em cima (a fila para e ele sobe um pouquinho)
 let filaUltimo = 0;
 
@@ -82,12 +83,11 @@ function iniciarFila() {
     }
     cena.addEventListener('wheel', e => {
       e.preventDefault();
-      if (filaTodaAberta()) { filaInterromperPasso(); filaVel += (e.deltaY + e.deltaX) / 3000; }
+      if (filaTodaAberta()) { filaVel += (e.deltaY + e.deltaX) / 3000; }
       else abrirFila();
     }, { passive: false });
     cena.addEventListener('pointerdown', e => {
       if (!filaTodaAberta()) { abrirFila(); return; } // no celular, o toque abre
-      filaInterromperPasso();
       filaArrasto = { x: e.clientX, y: e.clientY, pos: filaPos, fundo: e.target === cena, moveu: false };
       filaVel = 0;
       cena.setPointerCapture(e.pointerId);
@@ -115,7 +115,7 @@ function iniciarFila() {
   // toda vez que a home aparece, os quadrados voltam empilhados
   filaAberta = false;
   filaDe = 0;
-  filaMov = null;
+  filaForca = 0;
   filaSobre = null;
   filaPos = Math.round(filaPos);
   fila.forEach(q => { q.abre = 0; q.pulo = 0; });
@@ -136,7 +136,6 @@ function fecharFila() {
   filaDe = Math.min(...fila.map(q => q.abre));
   filaMudouEm = performance.now();
   filaVel = 0;
-  filaMov = null;
   filaSobre = null;
 }
 
@@ -144,26 +143,14 @@ function filaTodaAberta() {
   return filaAberta && fila.every(q => q.abre > 0.98);
 }
 
-// durante um passo automático, cada quadrado anda com um pequeno atraso em relação ao de cima:
-// o movimento começa no alto da tela e vai descendo como uma onda
-// cada step (pausa + onda inteira) dura 1s: 120 + 600 + 20 × 14
-const FILA_PASSO = 600, FILA_ONDA = 20; // ms: duração do passo de cada quadrado; atraso entre vizinhos
-function filaKAgora(i, agora) {
-  if (!filaMov) return filaK(i);
-  const k0 = filaK(i);
-  const atraso = Math.min(Math.max(k0 + 6, 0), FILA_N) * FILA_ONDA;
-  const p = Math.min(1, Math.max(0, (agora - filaMov.inicio - atraso) / FILA_PASSO));
-  const suave = 0.5 - Math.cos(Math.PI * p) / 2; // curva senoidal: entra e sai bem macio
-  const pos = filaMov.de + (filaMov.para - filaMov.de) * suave;
-  return (((i + pos) % FILA_N) + FILA_N) % FILA_N - FILA_N / 2;
-}
-
-// ao rolar/arrastar no meio de um passo, a fila assume a posição do quadrado do meio da tela
-function filaInterromperPasso() {
-  if (!filaMov) return;
-  const meio = fila.findIndex((q, i) => Math.round(filaK(i)) === 0);
-  filaPos += filaKAgora(meio, performance.now()) - filaK(meio);
-  filaMov = null;
+// a fila anda sozinha num ritmo pulsado: cada quadrado acelera, desacelera até quase parar
+// por um instante e acelera de novo. Cada um pulsa um pouco depois do de cima, então
+// a pulsação desce pela fila como uma onda (os vizinhos se aproximam e se afastam).
+const FILA_VEL = 1;   // quadrados por segundo (um pulso por segundo)
+const FILA_ONDAS = 2; // quantas ondas cabem na volta inteira da fila; mais = onda mais forte
+function filaKAgora(i) {
+  const desvio = -filaForca * Math.sin(filaFase - 2 * Math.PI * FILA_ONDAS * i / FILA_N) / (2 * Math.PI);
+  return (((i + filaPos + desvio) % FILA_N) + FILA_N) % FILA_N - FILA_N / 2;
 }
 
 function filaK(i) {
@@ -194,37 +181,33 @@ function animarFila(agora) {
     q.pulo = (filaAberta ? filaDe < 0.5 : filaDe > 0.5) ? Math.sin(Math.PI * curva) : 0;
   });
   // a fila só anda depois de totalmente aberta (assim nenhum quadrado "pula" de ponta a ponta à vista)
-  // passar o mouse num quadrado congela a fila (o passo atual é adiado enquanto o mouse estiver em cima)
-  const dt = filaUltimo ? agora - filaUltimo : 0;
+  // passar o mouse num quadrado congela a fila do jeitinho que ela está
+  const dt = filaUltimo ? Math.min(agora - filaUltimo, 50) / 1000 : 0;
   filaUltimo = agora;
-  if (filaSobre && filaMov) filaMov.inicio += dt;
+  let alvoForca = 0;
   if (filaTodaAberta() && !filaArrasto) {
     if (Math.abs(filaVel) > 0.0008) {
       // embalo de quando rolou/arrastou
       filaPos += filaVel;
       filaVel *= 0.92;
-      filaMov = null;
-    } else if (!filaSobre) {
-      // anda sozinha aos passos: cada quadrado para um instante no meio da tela e o próximo chega
+    } else if (filaSobre) {
+      alvoForca = filaForca;
+    } else {
       filaVel = 0;
-      const PAUSA = 120; // ms
-      if (!filaMov) {
-        const inteiro = Math.abs(filaPos - Math.round(filaPos)) < 0.001;
-        filaMov = inteiro
-          ? { de: filaPos, para: Math.round(filaPos) + 1, inicio: agora + PAUSA }
-          : { de: filaPos, para: Math.ceil(filaPos), inicio: agora }; // termina o passo até o próximo quadrado
-      }
-      // o passo termina quando o último quadrado (o de baixo) chega
-      if (agora - filaMov.inicio >= FILA_PASSO + FILA_ONDA * (FILA_N / 2 + 6)) { filaPos = filaMov.para; filaMov = null; }
+      filaPos += FILA_VEL * dt;
+      filaFase += 2 * Math.PI * FILA_VEL * dt;
+      alvoForca = 1;
     }
   }
+  // a onda entra e sai aos poucos (ao abrir, ao arrastar), sem tranco
+  filaForca += (alvoForca - filaForca) * Math.min(1, dt * 3);
   const W = window.innerWidth, H = window.innerHeight;
   const t = filaTamanho();
   const mobile = W < 768; // no celular a diagonal fica mais em pé
   const dx = t * (mobile ? 0.34 : 0.6), dy = t * (mobile ? 0.55 : 0.5);
   fila.forEach(q => { q.ergue += ((filaSobre === q.el ? 1 : 0) - q.ergue) * 0.14; });
   fila.forEach((q, i) => {
-    const k = filaKAgora(i, agora);
+    const k = filaKAgora(i);
     const solto = 1 - q.abre; // desalinho só na pilha; some conforme abre
     const x = W / 2 + k * dx * q.abre + q.bx * t * solto - t / 2;
     const y = H / 2 + k * dy * q.abre + q.by * t * solto - q.pulo * t * 0.42 - q.ergue * t * 0.16 - t / 2;
@@ -311,6 +294,7 @@ const projetos = [
       'imagens/projetos/maismais/video-02-digitacao.mp4',
       { src: 'imagens/projetos/maismais/fotos-revista-aberta.jpg', menor: true },
       { src: 'imagens/projetos/maismais/fotos-02.jpg', largura: 90 },
+      'imagens/projetos/maismais/fotos-paginas.webp',
       { olho: '“Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.”' },
       ['imagens/projetos/maismais/fotos-03.jpg', 'imagens/projetos/maismais/fotos-04.jpg'],
       'imagens/projetos/maismais/video-grid.mp4',
